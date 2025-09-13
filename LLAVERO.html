@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MYFLOWXX - ID Único</title>
+    <!-- Tailwind CSS for fast and responsive design -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for modern typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles for animation and overall aesthetics */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #000000;
+            color: #10B981; /* A vibrant green */
+            overflow: hidden; /* Prevents scrollbars during animation */
+        }
+
+        /* Container for 3D perspective */
+        .perspective-container {
+            perspective: 1000px;
+        }
+
+        /* 3D logo styles and animation */
+        .logo-3d {
+            font-size: 2.5rem;
+            font-weight: 900;
+            transform-style: preserve-3d;
+            animation: spin3d 10s linear infinite;
+        }
+
+        @keyframes spin3d {
+            from {
+                transform: rotateY(0deg);
+            }
+            to {
+                transform: rotateY(360deg);
+            }
+        }
+
+        /* Style for numbers inside the roulette */
+        .roulette-item {
+            height: 6rem; /* 96px, matches Tailwind's h-24 class */
+            font-size: 3rem; /* 48px */
+            font-weight: 700;
+        }
+        
+        /* Styles for the slogan */
+        #slogan {
+            transition: opacity 1s ease; /* Transition for a smooth appearance */
+        }
+        
+        /* Styles for the final number and its reveal animation */
+        #unique-number {
+            font-size: 8rem;
+            font-weight: 900;
+            letter-spacing: 0.05em;
+            text-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
+            animation: revealNumber 0.5s ease-out forwards;
+        }
+
+        @keyframes revealNumber {
+            from {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        /* Media query for responsive final number */
+        @media (max-width: 640px) {
+            #unique-number {
+                font-size: 5rem;
+            }
+        }
+        
+        /* Button for the official website */
+        .btn-link {
+            font-size: 0.9rem;
+            color: #6B7280; /* A subtle gray */
+            transition: all 0.3s ease;
+        }
+        .btn-link:hover {
+            color: #10B981;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body class="bg-black flex items-center justify-center min-h-screen">
+
+    <main class="text-center p-4 flex flex-col items-center gap-12">
+        <!-- 3D effect logo -->
+        <div class="perspective-container">
+            <div class="logo-3d">MYFLOWXX</div>
+        </div>
+
+        <!-- Main container for animation and final result -->
+        <div class="flex flex-col items-center gap-4 h-48 justify-center">
+            <!-- Roulette Container -->
+            <div id="roulette-container" class="h-24 w-48 overflow-hidden relative border-y-2 border-green-500/30">
+                <!-- Reel that will move vertically -->
+                <div id="roulette-reel" class="absolute top-0 left-0 w-full">
+                    <!-- Numbers will be injected here with JavaScript -->
+                </div>
+                <!-- Gradient overlay for fade effect -->
+                <div class="absolute inset-0" style="background: linear-gradient(to bottom, #000 0%, transparent 20%, transparent 80%, #000 100%);"></div>
+            </div>
+
+            <!-- The final number will be displayed here after the animation -->
+            <h1 id="unique-number" class="text-green-400 hidden"></h1>
+
+            <p id="slogan" class="text-gray-400 text-lg uppercase tracking-widest opacity-0">
+                THIS IS YOUR TICKET...
+            </p>
+        </div>
+
+        <!-- Link to the official website -->
+        <a href="https://myflowxx.com" target="_blank" rel="noopener noreferrer" class="btn-link absolute bottom-8">
+            Ir a myflowxx.com
+        </a>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const rouletteContainer = document.getElementById('roulette-container');
+            const rouletteReel = document.getElementById('roulette-reel');
+            const numberElement = document.getElementById('unique-number');
+            const sloganElement = document.getElementById('slogan');
+
+            // --- Animation configuration ---
+            const ITEM_HEIGHT_PX = 96; // Corresponds to h-24 (6rem * 16px/rem)
+            const REEL_ITEM_COUNT = 40; // Number of items in the reel for a good effect
+            const ANIMATION_DURATION_MS = 2800; // Animation duration (less than 3 seconds)
+
+            // --- Generates a random 3-digit number with leading zeros ---
+            function generateRandomNumber() {
+                return Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+            }
+
+            // --- Starts the roulette animation ---
+            function startRouletteAnimation() {
+                // 1. Choose the final winning number from the start
+                const finalNumber = generateRandomNumber();
+
+                // 2. Populate the reel with random numbers for visual effect
+                let reelHTML = '';
+                for (let i = 0; i < REEL_ITEM_COUNT - 1; i++) {
+                    reelHTML += `<div class="roulette-item flex items-center justify-center">${generateRandomNumber()}</div>`;
+                }
+                // Ensure the last number in the reel is the winner
+                reelHTML += `<div class="roulette-item flex items-center justify-center">${finalNumber}</div>`;
+                rouletteReel.innerHTML = reelHTML;
+
+                // 3. Start the spin animation
+                // We use a short delay to ensure the browser renders the elements
+                // before applying the CSS transition.
+                setTimeout(() => {
+                    // Calculate the final position so the last element (the winner) is centered
+                    const finalPosition = -((REEL_ITEM_COUNT - 1) * ITEM_HEIGHT_PX);
+                    
+                    rouletteReel.style.transition = `transform ${ANIMATION_DURATION_MS}ms cubic-bezier(0.25, 1, 0.5, 1)`;
+                    rouletteReel.style.transform = `translateY(${finalPosition}px)`;
+                }, 100);
+
+                // 4. Display the final result once the animation is finished
+                setTimeout(() => {
+                    rouletteContainer.style.display = 'none'; // Hide the roulette
+                    numberElement.textContent = finalNumber;
+                    numberElement.classList.remove('hidden'); // Show the winning number
+                    sloganElement.style.opacity = '1'; // Show the slogan
+                }, ANIMATION_DURATION_MS + 200); // A small buffer is added
+            }
+
+            // Start the whole process once the page loads
+            startRouletteAnimation();
+        });
+    </script>
+</body>
+</html>
+
